@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIPRIOS</title>
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../assets/fontawesome/css/all.min.css">
+</head>
+<body>
+<div class="app" data-screen-label="Input Data Warga">
+  <div id="shell-sidebar"></div>
+  <div class="main">
+    <div id="shell-topbar"></div>
+    <div class="content">
+      <div class="content__inner">
+
+        <nav class="breadcrumb"><a href="../index.html">Dashboard</a><span class="sep">&rsaquo;</span><a href="prioritas.html">Daftar Prioritas</a><span class="sep">&rsaquo;</span><span id="breadcrumbLabel">Input Data Warga</span></nav>
+        <div class="page-hero">
+          <h1 id="pageTitle">Input Data Rumah Tangga</h1>
+          <p id="pageDesc">Isi data satu kepala keluarga selengkap mungkin. Data ini digunakan untuk menilai tingkat kebutuhan bantuan secara objektif.</p>
+          <div class="batik-rule"></div>
+        </div>
+
+        <form id="wargaForm" novalidate>
+        <div class="input-layout">
+
+          <!-- KIRI: FORM -->
+          <div class="card card--pad-lg">
+            <div class="form-grid">
+
+              <div class="fieldset-label"><span class="diamond">&#9670;</span> Identitas Keluarga</div>
+
+              <div class="field" data-field="nomorKK">
+                <label for="nomorKK">Nomor KK <span class="req">*</span></label>
+                <input type="text" id="nomorKK" name="nomorKK" inputmode="numeric" maxlength="16" placeholder="35XXXXXXXXXXXXXX">
+                <span class="err-msg">Nomor KK harus tepat 16 digit angka</span>
+              </div>
+
+              <div class="field" data-field="nama">
+                <label for="nama">Nama Kepala Keluarga <span class="req">*</span></label>
+                <input type="text" id="nama" name="nama" placeholder="contoh: Budi Santoso">
+                <span class="err-msg">Nama minimal 3 karakter</span>
+              </div>
+
+              <div class="field" data-field="sewaBulanan">
+                <label for="sewaBulanan">Sewa Bulanan (Rp)</label>
+                <input type="number" id="sewaBulanan" name="sewaBulanan" min="0" placeholder="0 jika milik sendiri">
+                <span class="helper">Kosongkan atau isi 0 jika rumah milik sendiri</span>
+              </div>
+
+              <div class="field" data-field="punyaKulkas">
+                <label>Punya Kulkas?</label>
+                <div class="pill-row" data-pill="punyaKulkas">
+                  <label class="pill"><input type="radio" name="punyaKulkas" value="Ya">Ya</label>
+                  <label class="pill"><input type="radio" name="punyaKulkas" value="Tidak">Tidak</label>
+                </div>
+              </div>
+
+              <div class="fieldset-label"><span class="diamond">&#9670;</span> Komposisi Keluarga</div>
+
+              <div class="field" data-field="totalAnggota">
+                <label for="totalAnggota">Total Anggota Keluarga <span class="req">*</span></label>
+                <div class="stepper-row"><div class="stepper"><button type="button" data-step="-1"><i class="fa-solid fa-minus"></i></button><input type="number" id="totalAnggota" name="totalAnggota" min="1" placeholder="0"><button type="button" data-step="1"><i class="fa-solid fa-plus"></i></button></div><span class="stepper-unit">orang</span></div>
+                <span class="err-msg">Total anggota minimal 1 orang</span>
+              </div>
+
+              <div class="field" data-field="jumlahDewasa">
+                <label for="jumlahDewasa">Jumlah Dewasa <span class="req">*</span></label>
+                <div class="stepper-row"><div class="stepper"><button type="button" data-step="-1"><i class="fa-solid fa-minus"></i></button><input type="number" id="jumlahDewasa" name="jumlahDewasa" min="1" placeholder="0"><button type="button" data-step="1"><i class="fa-solid fa-plus"></i></button></div><span class="stepper-unit">orang</span></div>
+                <span class="err-msg">Jumlah dewasa minimal 1 orang</span>
+              </div>
+
+              <div class="field" data-field="jumlahAnak">
+                <label for="jumlahAnak">Jumlah Anak (0&ndash;19 thn) <span class="req">*</span></label>
+                <div class="stepper-row"><div class="stepper"><button type="button" data-step="-1"><i class="fa-solid fa-minus"></i></button><input type="number" id="jumlahAnak" name="jumlahAnak" min="0" placeholder="0"><button type="button" data-step="1"><i class="fa-solid fa-plus"></i></button></div><span class="stepper-unit">orang</span></div>
+                <span class="err-msg">Wajib diisi (boleh 0)</span>
+              </div>
+
+              <div class="field" data-field="jumlahLansia">
+                <label for="jumlahLansia">Jumlah Lansia (65+ thn) <span class="req">*</span></label>
+                <div class="stepper-row"><div class="stepper"><button type="button" data-step="-1"><i class="fa-solid fa-minus"></i></button><input type="number" id="jumlahLansia" name="jumlahLansia" min="0" placeholder="0"><button type="button" data-step="1"><i class="fa-solid fa-plus"></i></button></div><span class="stepper-unit">orang</span></div>
+                <span class="err-msg">Wajib diisi (boleh 0)</span>
+              </div>
+
+              <div class="fieldset-label"><span class="diamond">&#9670;</span> Kondisi Hunian</div>
+
+              <div class="field" data-field="jumlahRuangan">
+                <label for="jumlahRuangan">Jumlah Ruangan <span class="req">*</span></label>
+                <div class="stepper-row"><div class="stepper"><button type="button" data-step="-1"><i class="fa-solid fa-minus"></i></button><input type="number" id="jumlahRuangan" name="jumlahRuangan" min="1" placeholder="0"><button type="button" data-step="1"><i class="fa-solid fa-plus"></i></button></div><span class="stepper-unit">ruang</span></div>
+                <span class="err-msg">Minimal 1 ruangan</span>
+              </div>
+
+              <div class="field" data-field="kamarTidur">
+                <label for="kamarTidur">Jumlah Kamar Tidur <span class="req">*</span></label>
+                <div class="stepper-row"><div class="stepper"><button type="button" data-step="-1"><i class="fa-solid fa-minus"></i></button><input type="number" id="kamarTidur" name="kamarTidur" min="0" placeholder="0"><button type="button" data-step="1"><i class="fa-solid fa-plus"></i></button></div><span class="stepper-unit">kamar</span></div>
+                <span class="err-msg">Wajib diisi (boleh 0)</span>
+              </div>
+
+              <div class="field" data-field="punyaKamarMandi">
+                <label>Punya Kamar Mandi?</label>
+                <div class="pill-row" data-pill="punyaKamarMandi">
+                  <label class="pill"><input type="radio" name="punyaKamarMandi" value="Ya">Ya</label>
+                  <label class="pill"><input type="radio" name="punyaKamarMandi" value="Tidak">Tidak</label>
+                </div>
+              </div>
+
+              <div class="field" data-field="airBersih">
+                <label>Air Bersih di Dalam Rumah?</label>
+                <div class="pill-row" data-pill="airBersih">
+                  <label class="pill"><input type="radio" name="airBersih" value="Ya">Ya</label>
+                  <label class="pill"><input type="radio" name="airBersih" value="Tidak">Tidak</label>
+                </div>
+              </div>
+
+              <div class="field" data-field="adaListrik">
+                <label>Ada Listrik?</label>
+                <div class="pill-row" data-pill="adaListrik">
+                  <label class="pill"><input type="radio" name="adaListrik" value="Ya">Ya</label>
+                  <label class="pill"><input type="radio" name="adaListrik" value="Tidak">Tidak</label>
+                </div>
+              </div>
+
+              <div class="field" data-field="punyaPlafon">
+                <label>Punya Plafon?</label>
+                <div class="pill-row" data-pill="punyaPlafon">
+                  <label class="pill"><input type="radio" name="punyaPlafon" value="Ya">Ya</label>
+                  <label class="pill"><input type="radio" name="punyaPlafon" value="Tidak">Tidak</label>
+                </div>
+              </div>
+
+              <div class="field" data-field="punyaDapur">
+                <label>Punya Dapur?</label>
+                <div class="pill-row" data-pill="punyaDapur">
+                  <label class="pill"><input type="radio" name="punyaDapur" value="Ya">Ya</label>
+                  <label class="pill"><input type="radio" name="punyaDapur" value="Tidak">Tidak</label>
+                </div>
+              </div>
+
+              <div class="field field--full" data-field="statusToilet">
+                <label>Status Toilet <span class="req">*</span></label>
+                <div class="pill-row" data-pill="statusToilet">
+                  <label class="pill"><input type="radio" name="statusToilet" value="Tidak Ada">Tidak Ada</label>
+                  <label class="pill"><input type="radio" name="statusToilet" value="Tidak Layak">Tidak Layak</label>
+                  <label class="pill"><input type="radio" name="statusToilet" value="Layak">Layak</label>
+                </div>
+                <span class="err-msg">Status toilet wajib dipilih</span>
+              </div>
+
+              <div class="field field--full" data-field="statusRumah">
+                <label>Status Kepemilikan Rumah <span class="req">*</span></label>
+                <div class="pill-row" data-pill="statusRumah">
+                  <label class="pill"><input type="radio" name="statusRumah" value="Milik Sendiri">Milik Sendiri</label>
+                  <label class="pill"><input type="radio" name="statusRumah" value="Sewa/Cicilan">Sewa/Cicilan</label>
+                  <label class="pill"><input type="radio" name="statusRumah" value="Tidak Layak">Tidak Layak</label>
+                  <label class="pill"><input type="radio" name="statusRumah" value="Lainnya">Lainnya</label>
+                </div>
+                <span class="err-msg">Status kepemilikan wajib dipilih</span>
+              </div>
+
+              <div class="fieldset-label"><span class="diamond">&#9670;</span> Pendidikan</div>
+
+              <div class="field" data-field="rataSekolah">
+                <label for="rataSekolah">Rata-rata Tahun Sekolah Dewasa <span class="req">*</span></label>
+                <input type="number" id="rataSekolah" name="rataSekolah" min="0" max="20" step="0.5" placeholder="contoh: 9 (setara SMP)">
+                <span class="err-msg">Nilai 0&ndash;20 tahun</span>
+              </div>
+
+              <div class="field" data-field="adaTidakSekolah">
+                <label>Ada yang Tidak Pernah Sekolah?</label>
+                <div class="pill-row" data-pill="adaTidakSekolah">
+                  <label class="pill"><input type="radio" name="adaTidakSekolah" value="Ya">Ya</label>
+                  <label class="pill"><input type="radio" name="adaTidakSekolah" value="Tidak">Tidak</label>
+                </div>
+              </div>
+
+              <div class="field" data-field="adaPendidikanTinggi">
+                <label>Ada yang Pendidikan Tinggi (S1+)?</label>
+                <div class="pill-row" data-pill="adaPendidikanTinggi">
+                  <label class="pill"><input type="radio" name="adaPendidikanTinggi" value="Ya">Ya</label>
+                  <label class="pill"><input type="radio" name="adaPendidikanTinggi" value="Tidak">Tidak</label>
+                </div>
+              </div>
+
+              <div class="field field--full">
+                <label for="foto">Foto Kondisi Rumah</label>
+                <label class="upload" for="foto" id="uploadBox">
+                  <div class="ic"><i class="fa-solid fa-camera"></i></div>
+                  <p>Klik untuk pilih foto &middot; JPG, PNG, WebP &middot; maks 5MB</p>
+                </label>
+                <input type="file" id="foto" name="foto" accept="image/jpeg,image/png,image/webp" hidden>
+                <div class="upload-preview" id="fotoPreview" style="display:none;">
+                  <img id="fotoImg" alt="Pratinjau foto kondisi rumah">
+                  <div><b id="fotoName" style="font-size:14px;"></b><br><button type="button" class="btn btn--ghost" id="fotoRemove" style="margin-top:8px;min-height:auto;padding:6px 12px;">Hapus</button></div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- KANAN: RINGKASAN STICKY -->
+          <div class="summary-panel">
+            <div class="card">
+              <div class="section-head"><span class="eyebrow"><span class="diamond">&#9670;</span> Ringkasan Data</span></div>
+              <div class="summary-row"><span class="k">Nama KK</span><span class="v" id="sumNama">&mdash;</span></div>
+              <div class="summary-row"><span class="k">Nomor KK</span><span class="v kk-no" id="sumKK">&mdash;</span></div>
+              <div class="summary-row"><span class="k">Total Anggota</span><span class="v" id="sumTotal">&mdash;</span></div>
+              <div class="summary-row"><span class="k">Komposisi</span><span class="v" id="sumKomposisi">&mdash;</span></div>
+
+              <div style="font-size:13px;font-weight:600;color:var(--color-muted);margin:16px 0 4px;">Fasilitas Dasar</div>
+              <div class="util-grid" id="utilGrid">
+                <div class="util-chip"><span class="mark no" data-u="punyaKamarMandi"><i class="fa-solid fa-xmark"></i></span> Kamar Mandi</div>
+                <div class="util-chip"><span class="mark no" data-u="airBersih"><i class="fa-solid fa-xmark"></i></span> Air Bersih</div>
+                <div class="util-chip"><span class="mark no" data-u="adaListrik"><i class="fa-solid fa-xmark"></i></span> Listrik</div>
+                <div class="util-chip"><span class="mark no" data-u="punyaPlafon"><i class="fa-solid fa-xmark"></i></span> Plafon</div>
+                <div class="util-chip"><span class="mark no" data-u="punyaDapur"><i class="fa-solid fa-xmark"></i></span> Dapur</div>
+              </div>
+
+              <div id="sumFotoWrap" style="display:none;margin:12px 0;">
+                <div style="font-size:13px;font-weight:600;color:var(--color-muted);margin-bottom:6px;">Foto Kondisi Rumah</div>
+                <img id="sumFoto" style="width:100%;border-radius:8px;border:1px solid var(--color-border);" alt="Foto kondisi rumah">
+              </div>
+
+              <div class="progress-wrap">
+                <div class="progress-label"><span>Kelengkapan data wajib</span><span id="progText">0/11</span></div>
+                <div class="progress-track"><div class="progress-fill" id="progFill"></div></div>
+              </div>
+
+              <button type="submit" class="btn btn--primary btn--block btn--lg" style="margin-top:20px;">Simpan &amp; Nilai Kelayakan</button>
+            </div>
+          </div>
+
+        </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../js/core.js"></script>
+<script src="../js/input-page.js"></script>
+</body>
+</html>

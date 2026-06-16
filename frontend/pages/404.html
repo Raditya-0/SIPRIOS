@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Halaman Tidak Ditemukan</title>
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../assets/fontawesome/css/all.min.css">
+</head>
+<body>
+<div class="app" data-screen-label="404">
+  <div id="shell-sidebar"></div>
+  <div class="main">
+    <div id="shell-topbar"></div>
+    <div class="content">
+      <div class="content__inner">
+        <div style="display:flex;justify-content:center;padding:var(--sp-10) var(--sp-2);">
+          <div class="card card--pad-lg" style="max-width:520px;width:100%;text-align:center;">
+            <div style="font-size:64px;line-height:1;margin-bottom:var(--sp-6);"><i class="fa-solid fa-circle-exclamation"></i></div>
+            <div style="font-size:96px;font-weight:700;color:var(--color-border);line-height:1;margin-bottom:var(--sp-4);">404</div>
+            <h1 style="font-size:28px;font-weight:700;letter-spacing:-0.02em;margin:0 0 var(--sp-2);">Halaman Tidak Ditemukan</h1>
+            <p style="font-size:16px;color:var(--color-muted);margin:0 0 var(--sp-8);">Halaman yang Anda cari tidak tersedia atau telah dipindahkan.</p>
+            <a class="btn btn--primary" href="../index.html"><i class="fa-solid fa-arrow-left btn-icon"></i>Kembali ke Dashboard</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="../js/core.js"></script>
+<script>
+(function () {
+  window.SIPRIOS.renderShell({ active: "", title: "Halaman Tidak Ditemukan" });
+})();
+</script>
+</body>
+</html>

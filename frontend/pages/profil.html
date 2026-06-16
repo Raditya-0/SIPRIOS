@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIPRIOS</title>
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../assets/fontawesome/css/all.min.css">
+</head>
+<body>
+<div class="app" data-screen-label="Profil Warga">
+  <div id="shell-sidebar"></div>
+  <div class="main">
+    <div id="shell-topbar"></div>
+    <div class="content">
+      <div class="content__inner" id="profilRoot"></div>
+    </div>
+  </div>
+</div>
+
+<script src="../js/core.js"></script>
+<script>
+(function () {
+  var S = window.SIPRIOS;
+  if (!S.renderShell({ active: "/pages/prioritas.html", title: "Profil Kelayakan Warga" })) return;
+
+  var root = document.getElementById("profilRoot");
+  var selectedId = S.Store.selectedId();
+
+  var emptyHtml = '<nav class="breadcrumb"><a href="../index.html">Dashboard</a><span class="sep">&rsaquo;</span><a href="prioritas.html">Daftar Prioritas</a><span class="sep">&rsaquo;</span><span>Profil</span></nav>' +
+    '<div class="card"><div class="empty"><div class="ic empty-icon"><i class="fa-solid fa-clipboard-list"></i></div><h3>Data belum tersedia</h3>' +
+    '<p>Pilih salah satu warga dari Daftar Prioritas untuk melihat profil kelayakannya.</p>' +
+    '<a class="btn btn--primary" href="prioritas.html">Buka Daftar Prioritas</a></div></div>';
+
+  if (!selectedId) {
+    root.innerHTML = emptyHtml;
+    return;
+  }
+
+  S.overlay(true, "Memuat profil...");
+  S.getWarga(selectedId).then(function (w) {
+    S.overlay(false);
+    renderProfil(w);
+  }).catch(function (err) {
+    S.overlay(false);
+    S.toast(err.message || "Data warga tidak ditemukan.", "error");
+    root.innerHTML = emptyHtml;
+  });
+
+  function renderProfil(w) {
+  var yn = function (v) { return v === "Ya" ? "Ya" : v === "Tidak" ? "Tidak" : (v || "\u2014"); };
+  var barColor = w.score >= 70 ? "#dc2626" : w.score >= 40 ? "#ca8a04" : "#16a34a";
+
+  // Faktor
+  var faktorHtml = w.faktor.map(function (f) {
+    var arrow = f.dir === "up" ? '<i class="fa-solid fa-arrow-trend-up factor-icon"></i>' : f.dir === "down" ? '<i class="fa-solid fa-arrow-trend-down factor-icon"></i>' : '<i class="fa-solid fa-minus factor-icon"></i>';
+    return '<div class="factor-item"><div class="factor-arrow ' + f.dir + '">' + arrow + '</div>' +
+      '<div><p class="cat">' + f.cat + '</p><p class="detail">' + f.detail + '</p></div></div>';
+  }).join("");
+
+  // Card 4 — ringkasan data
+  var rows = [
+    ["Nomor KK", '<span class="kk-no">' + w.nomorKK + '</span>'],
+    ["Nama Kepala Keluarga", w.nama],
+    ["Sewa Bulanan", S.rupiah(w.sewaBulanan)],
+    ["Punya Kulkas", yn(w.punyaKulkas)],
+    ["Total Anggota Keluarga", w.totalAnggota + " orang"],
+    ["Jumlah Dewasa", w.jumlahDewasa + " orang"],
+    ["Jumlah Anak (0–19)", w.jumlahAnak + " orang"],
+    ["Jumlah Lansia (65+)", w.jumlahLansia + " orang"],
+    ["Jumlah Ruangan", w.jumlahRuangan + " ruang"],
+    ["Jumlah Kamar Tidur", w.kamarTidur + " kamar"],
+    ["Punya Kamar Mandi", yn(w.punyaKamarMandi)],
+    ["Air Bersih di Dalam Rumah", yn(w.airBersih)],
+    ["Ada Listrik", yn(w.adaListrik)],
+    ["Punya Plafon", yn(w.punyaPlafon)],
+    ["Punya Dapur", yn(w.punyaDapur)],
+    ["Status Toilet", w.statusToilet],
+    ["Status Kepemilikan Rumah", w.statusRumah],
+    ["Rata-rata Tahun Sekolah Dewasa", w.rataSekolah + " tahun"],
+    ["Ada yang Tidak Pernah Sekolah", yn(w.adaTidakSekolah)],
+    ["Ada yang Pendidikan Tinggi (S1+)", yn(w.adaPendidikanTinggi)]
+  ].map(function (r) { return '<tr><td class="k">' + r[0] + '</td><td class="v">' + r[1] + '</td></tr>'; }).join("");
+
+  // Card 3 — kondisi hunian
+  var kondClass = w.kondisi.cls;
+  var fotoHtml = w.fotoUrl
+    ? '<img class="condition-photo" src="' + w.fotoUrl + '" alt="Foto kondisi rumah ' + w.nama + '">'
+    : '<div style="width:100%;max-width:200px;height:130px;border-radius:8px;background:repeating-linear-gradient(45deg,#f3f4f6 0 8px,#eceef0 8px 16px);display:grid;place-items:center;gap:8px;color:var(--color-muted);font-family:var(--mono);font-size:12px;text-align:center;"><i class="fa-solid fa-image" style="font-size:24px;"></i>foto kondisi<br>rumah belum<br>tersedia</div>';
+
+  root.innerHTML =
+    '<nav class="breadcrumb"><a href="../index.html">Dashboard</a><span class="sep">&rsaquo;</span><a href="prioritas.html">Daftar Prioritas</a><span class="sep">&rsaquo;</span><span>Profil: ' + w.nama + '</span></nav>' +
+    '<div class="page-hero"><h1>Profil Kelayakan Warga</h1><div class="batik-rule"></div></div>' +
+
+    '<div class="profil-layout">' +
+
+      // KIRI
+      '<div style="display:flex;flex-direction:column;gap:24px;">' +
+
+        // Card 1
+        '<div class="card">' +
+          '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;">' +
+            '<div><p class="profil-id__name">' + w.nama + '</p><span class="kk-no">' + w.nomorKK + '</span></div>' +
+            '<div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">' +
+            '<span class="badge badge--' + w.kategori.key + ' badge--lg"><span class="dot"></span>' + w.kategori.label + '</span>' +
+            (w.penerima ? '<span class="penerima-badge"><i class="fa-solid fa-check"></i> Penerima Bantuan</span>' : '') +
+            '</div>' +
+          '</div>' +
+          '<div style="margin-top:20px;"><div style="font-size:13px;color:var(--color-muted);margin-bottom:6px;">Tingkat Kebutuhan Bantuan</div>' +
+          '<div class="need-bar"><div class="track" style="height:10px;"><div class="fill" style="width:' + w.score + '%;background:' + barColor + '"></div></div></div></div>' +
+        '</div>' +
+
+        // Card 2
+        '<div class="card">' +
+          '<div class="section-head"><div><span class="eyebrow"><span class="diamond">&#9670;</span> Penilaian</span><h2 style="font-size:18px;margin-top:4px;">Faktor Penentu Kelayakan</h2></div></div>' +
+          faktorHtml +
+        '</div>' +
+
+        // Card 3
+        '<div class="card">' +
+          '<div class="section-head"><div><span class="eyebrow"><span class="diamond">&#9670;</span> Hunian</span><h2 style="font-size:18px;margin-top:4px;">Kondisi Hunian dari Foto</h2></div></div>' +
+          '<div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap;">' + fotoHtml +
+          '<div><span class="badge badge--' + kondClass + ' badge--lg">' + w.kondisi.label + '</span>' +
+          '<p style="font-size:13px;color:var(--color-muted);margin:12px 0 0;max-width:260px;">Kondisi hunian dinilai dari kelengkapan fasilitas dasar yang dilaporkan pada formulir.</p></div></div>' +
+        '</div>' +
+
+        // Card 4
+        '<div class="card">' +
+          '<div class="section-head"><div><span class="eyebrow"><span class="diamond">&#9670;</span> Data</span><h2 style="font-size:18px;margin-top:4px;">Ringkasan Data yang Diinput</h2></div></div>' +
+          '<table class="kv-table"><tbody>' + rows + '</tbody></table>' +
+        '</div>' +
+
+      '</div>' +
+
+      // KANAN
+      '<div style="display:flex;flex-direction:column;gap:24px;">' +
+        '<div class="card">' +
+          '<div class="section-head"><span class="eyebrow"><span class="diamond">&#9670;</span> Rekomendasi</span></div>' +
+          '<div class="reco-box">' + w.rekomendasi + '</div>' +
+        '</div>' +
+        '<div class="card">' +
+          '<div class="section-head"><span class="eyebrow"><span class="diamond">&#9670;</span> Navigasi</span></div>' +
+          '<p style="font-size:13px;color:var(--color-muted);margin:0 0 16px;">Daftar Prioritas &rsaquo; Profil: ' + w.nama + '</p>' +
+          '<a class="btn btn--ghost btn--block" href="prioritas.html"><i class="fa-solid fa-arrow-left btn-icon"></i>Kembali ke Daftar</a>' +
+        '</div>' +
+      '</div>' +
+
+    '</div>';
+  }
+})();
+</script>
+</body>
+</html>

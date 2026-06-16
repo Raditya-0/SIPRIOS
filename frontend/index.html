@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIPRIOS</title>
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="assets/fontawesome/css/all.min.css">
+</head>
+<body>
+<div class="app" data-screen-label="Dashboard">
+  <div id="shell-sidebar"></div>
+  <div class="main">
+    <div id="shell-topbar"></div>
+    <div class="content">
+      <div class="content__inner">
+
+        <nav class="breadcrumb"><span>Dashboard</span></nav>
+        <div class="page-hero">
+          <h1>Selamat Datang, Pengurus RT</h1>
+          <p>Kelola data sosial warga RT dengan adil dan transparan. Pantau ringkasan kondisi warga di wilayah Anda di bawah ini.</p>
+          <div class="batik-rule"></div>
+        </div>
+
+        <!-- Stat cards -->
+        <div class="stat-grid" id="statGrid"></div>
+
+        <!-- CTA -->
+        <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:32px;">
+          <a class="btn btn--primary btn--lg" href="pages/input.html" id="ctaInput" style="display:none;">Input Data Warga</a>
+          <a class="btn btn--outline btn--lg" href="pages/prioritas.html">Lihat Daftar Prioritas</a>
+        </div>
+
+        <!-- Distribusi + Data terbaru -->
+        <div id="dataArea"></div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/core.js"></script>
+<script>
+(function () {
+  var S = window.SIPRIOS;
+  if (!S.renderShell({ active: "/index.html", title: "Dashboard" })) return;
+
+  var user = S.Auth.current();
+  var isKepalaDesa = S.Auth.isKepalaDesa();
+  var ctaInput = document.getElementById("ctaInput");
+  if (ctaInput && isKepalaDesa) ctaInput.style.display = "inline-flex";
+
+  // Sapa pengguna sesuai status
+  var heroH1 = document.querySelector(".page-hero h1");
+  var heroP = document.querySelector(".page-hero p");
+  if (heroH1) heroH1.textContent = user ? ("Selamat Datang, " + user.nama) : "Selamat Datang di SIPRIOS";
+  if (heroP) heroP.textContent = isKepalaDesa
+    ? "Kelola data sosial warga desa dengan adil dan transparan. Pantau ringkasan kondisi warga di bawah ini."
+    : "Pantau ringkasan kondisi sosial warga dan daftar prioritas bantuan secara terbuka dan transparan.";
+
+  S.overlay(true, "Memuat data...");
+  Promise.all([
+    S.listWarga(),
+    fetch(S.API_BASE + "/health").then(function (r) { return r.json(); }).catch(function () { return null; })
+  ]).then(function (res) {
+    S.overlay(false);
+    renderDashboard(res[0], res[1]);
+  }).catch(function (err) {
+    S.overlay(false);
+    S.toast(err.message || "Gagal memuat data warga dari server.", "error");
+    renderDashboard([], null);
+  });
+
+  function renderDashboard(list, health) {
+  var total = list.length;
+  var avg = total ? Math.round(list.reduce(function (a, w) { return a + w.score; }, 0) / total) : null;
+  var sangat = list.filter(function (w) { return w.score >= 70; }).length;
+
+  // Stat cards
+  var cards = [
+    { label: "Total Warga Diinput", value: total, hint: "Kepala keluarga terdaftar", accent: "", icon: "fa-users" },
+    { label: "Rata-rata Tingkat Kebutuhan", value: avg === null ? "&mdash;" : avg, hint: total ? "Skala 0–100" : "Belum ada data", accent: "gold", icon: "fa-chart-bar" },
+    { label: "Membutuhkan", value: sangat, hint: "Prioritas tertinggi saat ini", accent: "", icon: "fa-hand-holding-heart" }
+  ];
+  var html = cards.map(function (c) {
+    var empty = (c.value === 0 || c.value === "&mdash;") ? " is-empty" : "";
+    return '<div class="stat-card ' + (c.accent === "gold" ? "accent-gold" : "") + '">' +
+      '<div class="label"><i class="fa-solid ' + c.icon + ' stat-icon"></i> ' + c.label + '</div>' +
+      '<div class="value' + empty + '">' + c.value + '</div>' +
+      '<div class="hint">' + c.hint + '</div></div>';
+  }).join("");
+  // Status sistem card
+  var mlIcon, mlText, mlColor;
+  if (health && health.ml_tabular && health.ml_cv) {
+    mlIcon = "fa-brain"; mlText = "Model AI aktif"; mlColor = "#008000";
+  } else if (health && health.ml_tabular) {
+    mlIcon = "fa-brain"; mlText = "Model AI aktif (tanpa analisis foto)"; mlColor = "#008000";
+  } else {
+    mlIcon = "fa-calculator"; mlText = "Mode penilaian manual"; mlColor = "#6E6E6E";
+  }
+  html += '<div class="stat-card accent-gold"><div class="label"><i class="fa-solid fa-server stat-icon"></i> Status Sistem</div>' +
+    '<div class="stat-status" style="color:var(--color-success);"><span class="status-dot is-on"></span> Aktif</div>' +
+    '<div class="hint">Siap menerima data warga<br><span style="font-size:12px;color:' + mlColor + ';"><i class="fa-solid ' + mlIcon + '" style="font-size:12px;margin-right:4px;"></i>' + mlText + '</span></div></div>';
+  document.getElementById("statGrid").innerHTML = html;
+
+  var area = document.getElementById("dataArea");
+
+  if (total === 0) {
+    var emptyCta = isKepalaDesa
+      ? '<a class="btn btn--primary" href="pages/input.html">Input Data Warga Pertama</a>'
+      : '<a class="btn btn--ghost" href="pages/prioritas.html">Buka Daftar Prioritas</a>';
+    area.innerHTML =
+      '<div class="card"><div class="empty">' +
+        '<div class="ic empty-icon"><i class="fa-solid fa-clipboard-list"></i></div>' +
+        '<h3>Belum ada data warga</h3>' +
+        '<p>' + (isKepalaDesa
+          ? 'Mulai dengan menginput data rumah tangga warga untuk melihat ringkasan dan tingkat kebutuhan bantuan.'
+          : 'Data warga diinput oleh Kepala Desa. Ringkasan dan daftar prioritas akan tampil setelah data tersedia.') + '</p>' +
+        emptyCta +
+      '</div></div>';
+    return;
+  }
+
+  // Distribusi tingkat kebutuhan (data nyata)
+  var buckets = [
+    { key: "need1", label: "Membutuhkan", color: "#dc2626", n: list.filter(function (w){return w.kategori.level===1;}).length },
+    { key: "need2", label: "Rawan", color: "#ea580c", n: list.filter(function (w){return w.kategori.level===2;}).length },
+    { key: "need3", label: "Cukup", color: "#ca8a04", n: list.filter(function (w){return w.kategori.level===3;}).length },
+    { key: "need4", label: "Mandiri", color: "#6b7280", n: list.filter(function (w){return w.kategori.level===4;}).length }
+  ];
+  var maxN = Math.max.apply(null, buckets.map(function (b) { return b.n; })) || 1;
+  var bars = buckets.map(function (b) {
+    var h = Math.round((b.n / maxN) * 140) + (b.n ? 8 : 0);
+    return '<div class="bar-col"><div class="bar-val" style="color:' + b.color + '">' + b.n + '</div>' +
+      '<div class="bar" style="height:' + h + 'px;background:' + b.color + '"></div>' +
+      '<div class="bar-label">' + b.label + '</div></div>';
+  }).join("");
+
+  // 5 data terbaru
+  var recent = list.slice(0, 5);
+  var rows = recent.map(function (w) {
+    return '<tr class="is-clickable" data-id="' + w.id + '">' +
+      '<td><b>' + w.nama + '</b></td>' +
+      '<td><span class="badge badge--' + w.kategori.key + '"><span class="dot"></span>' + w.kategori.label + '</span></td>' +
+      '<td style="color:var(--color-muted)">' + S.tanggalID(w.tanggal) + '</td></tr>';
+  }).join("");
+
+  area.innerHTML =
+    '<div class="layout-2col" style="margin-bottom:32px;">' +
+      '<div class="card">' +
+        '<div class="section-head"><div><span class="eyebrow"><span class="diamond">&#9670;</span> Sebaran Kebutuhan</span><h2 style="font-size:18px;margin-top:4px;">Tingkat Kebutuhan Warga</h2></div></div>' +
+        '<div class="bar-chart">' + bars + '</div>' +
+      '</div>' +
+      '<div class="card">' +
+        '<div class="section-head"><div><span class="eyebrow"><span class="diamond">&#9670;</span> Data Terbaru Diinput</span><h2 style="font-size:18px;margin-top:4px;">Warga Terakhir</h2></div></div>' +
+        '<div class="table-wrap"><table class="tbl"><thead><tr><th>Nama KK</th><th>Tingkat Kebutuhan</th><th>Tanggal</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      '</div>' +
+    '</div>';
+
+  area.querySelectorAll("tr[data-id]").forEach(function (tr) {
+    tr.addEventListener("click", function () {
+      S.Store.select(tr.getAttribute("data-id"));
+      window.location.href = "pages/profil.html";
+    });
+  });
+  }
+})();
+</script>
+</body>
+</html>

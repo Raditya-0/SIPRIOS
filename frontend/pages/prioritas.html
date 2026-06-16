@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIPRIOS</title>
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../assets/fontawesome/css/all.min.css">
+</head>
+<body>
+<div class="app" data-screen-label="Daftar Prioritas">
+  <div id="shell-sidebar"></div>
+  <div class="main">
+    <div id="shell-topbar"></div>
+    <div class="content">
+      <div class="content__inner">
+
+        <nav class="breadcrumb"><a href="../index.html">Dashboard</a><span class="sep">&rsaquo;</span><span>Daftar Prioritas</span></nav>
+        <div class="page-hero">
+          <h1>Daftar Prioritas Warga</h1>
+          <p>Warga diurutkan berdasarkan tingkat kebutuhan bantuan. Klik nama warga untuk melihat profil kelayakan secara lengkap.</p>
+          <div class="batik-rule"></div>
+        </div>
+
+        <div class="stat-grid" id="statGrid"></div>
+
+        <div id="roleBanner"></div>
+
+        <div class="card card--pad-lg" id="listCard">
+          <div class="toolbar">
+            <div class="search-box"><span class="ic"><i class="fa-solid fa-magnifying-glass"></i></span><input type="text" id="search" placeholder="Cari nama atau nomor KK..."></div>
+            <div class="chip-row" id="chips">
+              <button class="chip is-active" data-filter="all">Semua</button>
+              <button class="chip" data-filter="1">Membutuhkan</button>
+              <button class="chip" data-filter="2">Rawan</button>
+              <button class="chip" data-filter="3">Cukup</button>
+              <button class="chip" data-filter="4">Mandiri</button>
+            </div>
+            <div class="toolbar-actions">
+              <button class="btn btn--ghost" id="reloadBtn"><i class="fa-solid fa-rotate btn-icon"></i>Muat Ulang</button>
+              <span id="adminTools" style="display:none;gap:8px;">
+                <button class="btn btn--ghost" id="pdfBtn"><i class="fa-solid fa-file-pdf btn-icon"></i>Unduh PDF</button>
+                <button class="btn btn--outline" id="excelBtn"><i class="fa-solid fa-file-excel btn-icon"></i>Unduh Excel</button>
+              </span>
+            </div>
+          </div>
+
+          <div id="tableArea"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../js/core.js"></script>
+<script>
+(function () {
+  var S = window.SIPRIOS;
+  if (!S.renderShell({ active: "/pages/prioritas.html", title: "Daftar Prioritas" })) return;
+
+  var isAdmin = S.Auth.isAdmin();
+  var filter = "all";
+  var query = "";
+  var allData = [];
+
+  // Banner mode admin
+  (function () {
+    var banner = document.getElementById("roleBanner");
+    if (banner) banner.style.display = "none"; // banner dihapus per masukan Radit
+    if (isAdmin) {
+      document.getElementById("adminTools").style.display = "inline-flex";
+    }
+  })();
+
+  function stats(list) {
+    var total = list.length;
+    var avg = total ? Math.round(list.reduce(function (a, w) { return a + w.score; }, 0) / total) : null;
+    var sangat = list.filter(function (w) { return w.kategori.level === 1; }).length;
+    var membutuhkan = list.filter(function (w) { return w.kategori.level <= 2; }).length;
+    var cards = [
+      { label: "Total Warga", value: total, hint: "Kepala keluarga terdaftar", gold: false },
+      { label: "Rata-rata Kebutuhan", value: avg === null ? "&mdash;" : avg, hint: "Skala 0–100", gold: true },
+      { label: "Membutuhkan", value: sangat, hint: "Prioritas tertinggi", gold: false },
+      { label: "Disarankan Dibantu", value: membutuhkan, hint: "Membutuhkan & Rawan", gold: true }
+    ];
+    document.getElementById("statGrid").innerHTML = cards.map(function (c) {
+      var empty = (c.value === 0 || c.value === "&mdash;") ? " is-empty" : "";
+      return '<div class="stat-card ' + (c.gold ? "accent-gold" : "") + '"><div class="label">' + c.label + '</div>' +
+        '<div class="value' + empty + '">' + c.value + '</div><div class="hint">' + c.hint + '</div></div>';
+    }).join("");
+  }
+
+  function needBar(w) {
+    var color = w.score >= 70 ? "#dc2626" : w.score >= 40 ? "#ca8a04" : "#16a34a";
+    return '<div class="need-bar"><div class="track"><div class="fill" style="width:' + w.score + '%;background:' + color + '"></div></div><div class="val" style="color:' + color + '">' + w.score + '</div></div>';
+  }
+
+  function render() {
+    var all = allData.slice().sort(function (a, b) { return b.score - a.score; });
+    stats(all);
+
+    var list = all.filter(function (w) {
+      var fok = filter === "all" ||
+        (filter === "1" && w.kategori.level === 1) ||
+        (filter === "2" && w.kategori.level === 2) ||
+        (filter === "3" && w.kategori.level === 3) ||
+        (filter === "4" && w.kategori.level === 4);
+      var q = query.toLowerCase();
+      var qok = !q || w.nama.toLowerCase().indexOf(q) !== -1 || w.nomorKK.indexOf(q) !== -1;
+      return fok && qok;
+    });
+
+    var area = document.getElementById("tableArea");
+
+    if (all.length === 0) {
+      var cta = S.Auth.isKepalaDesa()
+        ? '<a class="btn btn--primary" href="input.html">Input Data Warga</a>'
+        : '';
+      area.innerHTML = '<div class="empty"><div class="ic empty-icon"><i class="fa-solid fa-clipboard-list"></i></div><h3>Belum ada data warga</h3>' +
+        '<p>Data rumah tangga warga diinput oleh Kepala Desa. Daftar prioritas akan muncul di sini setelah data tersedia.</p>' +
+        cta + '</div>';
+      return;
+    }
+    if (list.length === 0) {
+      area.innerHTML = '<div class="empty"><div class="ic empty-icon"><i class="fa-solid fa-magnifying-glass"></i></div><h3>Tidak ada hasil</h3>' +
+        '<p>Tidak ada warga yang cocok dengan pencarian atau filter saat ini.</p></div>';
+      return;
+    }
+
+    var isKepalaDesa = S.Auth.isKepalaDesa();
+    var currentUser = S.Auth.current();
+
+    var showKelola = isAdmin || isKepalaDesa;
+
+    var rows = list.map(function (w, i) {
+      var kelolaCell = '';
+      if (showKelola) {
+        if (isAdmin) {
+          kelolaCell = '<td><button class="btn btn--ghost" data-act="hapus" data-id="' + w.id + '" style="min-height:auto;padding:6px 12px;color:var(--color-danger);border-color:var(--color-danger);">Hapus</button></td>';
+        } else if (isKepalaDesa && currentUser && w.inputOleh === currentUser.username) {
+          kelolaCell = '<td><button class="btn btn--outline" data-act="edit" data-id="' + w.id + '" style="min-height:auto;padding:6px 12px;">Edit</button></td>';
+        } else {
+          kelolaCell = '<td></td>';
+        }
+      }
+      return '<tr class="is-clickable" data-id="' + w.id + '">' +
+        '<td class="rank-num">' + (i + 1) + '</td>' +
+        '<td><b>' + w.nama + '</b></td>' +
+        '<td class="kk-no">' + w.nomorKK + '</td>' +
+        '<td>' + needBar(w) + '</td>' +
+        '<td><span class="badge badge--' + w.kategori.key + '"><span class="dot"></span>' + w.kategori.label + '</span></td>' +
+        '<td style="color:var(--color-muted)">' + S.tanggalID(w.tanggal) + '</td>' +
+        '<td><span class="btn btn--outline" style="min-height:auto;padding:6px 14px;">Lihat <i class="fa-solid fa-arrow-right"></i></span></td>' +
+        kelolaCell +
+        '</tr>';
+    }).join("");
+
+    area.innerHTML = '<div class="table-wrap"><table class="tbl" style="width:100%;"><thead><tr>' +
+      '<th style="width:48px">#</th>' +
+      '<th style="width:20%">Nama KK</th>' +
+      '<th style="width:18%">Nomor KK</th>' +
+      '<th style="width:22%">Tingkat Kebutuhan</th>' +
+      '<th style="width:14%">Kategori</th>' +
+      '<th style="width:12%">Tanggal</th>' +
+      '<th>Aksi</th>' +
+      (showKelola ? '<th>Kelola</th>' : '') +
+      '</tr></thead><tbody>' + rows + '</tbody></table></div>';
+
+    // Navigasi ke profil (klik baris)
+    area.querySelectorAll("tr[data-id]").forEach(function (tr) {
+      tr.addEventListener("click", function () {
+        S.Store.select(tr.getAttribute("data-id"));
+        window.location.href = "profil.html";
+      });
+    });
+
+    // Aksi tombol kelola
+    area.querySelectorAll("button[data-act]").forEach(function (btn) {
+      btn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        var id = btn.getAttribute("data-id");
+        if (btn.getAttribute("data-act") === "hapus") {
+          var t = allData.find(function (w) { return w.id === id; });
+          S.openConfirm("Hapus Data Warga", "Data \"" + (t ? t.nama : "") + "\" akan dihapus dari daftar. Lanjutkan?", function () {
+            S.overlay(true, "Menghapus data...");
+            S.deleteWarga(id).then(function () {
+              S.overlay(false);
+              allData = allData.filter(function (w) { return w.id !== id; });
+              S.toast("Data warga dihapus.", "info");
+              render();
+            }).catch(function (err) {
+              S.overlay(false);
+              S.toast(err.message || "Gagal menghapus data warga.", "error");
+            });
+          });
+        } else if (btn.getAttribute("data-act") === "edit") {
+          sessionStorage.setItem("editTargetId", id);
+          window.location.href = "input.html?mode=edit&id=" + encodeURIComponent(id);
+        }
+      });
+    });
+  }
+
+  function load() {
+    S.overlay(true, "Memuat data...");
+    return S.listWarga().then(function (data) {
+      S.overlay(false);
+      allData = data;
+      render();
+    }).catch(function (err) {
+      S.overlay(false);
+      allData = [];
+      render();
+      S.toast(err.message || "Gagal memuat data warga dari server.", "error");
+    });
+  }
+
+  document.getElementById("search").addEventListener("input", function (e) { query = e.target.value; render(); });
+  document.getElementById("chips").addEventListener("click", function (e) {
+    var btn = e.target.closest(".chip"); if (!btn) return;
+    document.querySelectorAll(".chip").forEach(function (c) { c.classList.remove("is-active"); });
+    btn.classList.add("is-active");
+    filter = btn.getAttribute("data-filter");
+    render();
+  });
+  document.getElementById("reloadBtn").addEventListener("click", function () { load().then(function () { S.toast("Data dimuat ulang.", "info"); }); });
+  document.getElementById("pdfBtn").addEventListener("click", function () { S.toast("Menyiapkan dokumen PDF untuk diunduh...", "info"); });
+  document.getElementById("excelBtn").addEventListener("click", function () { S.toast("Menyiapkan berkas Excel untuk diunduh...", "info"); });
+
+  load();
+})();
+</script>
+</body>
+</html>

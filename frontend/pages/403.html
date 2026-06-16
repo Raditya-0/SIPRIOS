@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Akses Terbatas</title>
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../assets/fontawesome/css/all.min.css">
+</head>
+<body>
+<div class="app" data-screen-label="403">
+  <div id="shell-sidebar"></div>
+  <div class="main">
+    <div id="shell-topbar"></div>
+    <div class="content">
+      <div class="content__inner">
+        <div style="display:flex;justify-content:center;padding:var(--sp-10) var(--sp-2);">
+          <div class="card card--pad-lg" style="max-width:520px;width:100%;text-align:center;">
+            <div style="font-size:64px;line-height:1;margin-bottom:var(--sp-6);"><i class="fa-solid fa-lock"></i></div>
+            <h1 style="font-size:32px;font-weight:700;letter-spacing:-0.02em;margin:0 0 var(--sp-2);">Akses Terbatas</h1>
+            <p id="lockMsg" style="font-size:16px;color:var(--color-muted);margin:0 0 var(--sp-8);"></p>
+            <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+              <a class="btn btn--ghost" href="../index.html"><i class="fa-solid fa-arrow-left btn-icon"></i>Kembali ke Dashboard</a>
+              <button class="btn btn--primary" id="loginBtn403"><i class="fa-solid fa-arrow-right-to-bracket btn-icon"></i>Masuk</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="../js/core.js"></script>
+<script>
+(function () {
+  var S = window.SIPRIOS;
+  S.renderShell({ active: "", title: "Akses Terbatas" });
+  var msg = sessionStorage.getItem("lockReason") || "Halaman ini tidak dapat diakses dengan peran Anda saat ini.";
+  sessionStorage.removeItem("lockReason");
+  document.getElementById("lockMsg").textContent = msg;
+  document.getElementById("loginBtn403").addEventListener("click", function () {
+    S.openAuthModal("login");
+  });
+})();
+</script>
+</body>
+</html>
