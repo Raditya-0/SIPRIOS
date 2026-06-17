@@ -6,6 +6,9 @@
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.115-green?logo=fastapi)
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow?logo=javascript)
 ![License](https://img.shields.io/badge/License-MIT-red)
+![Status](https://img.shields.io/badge/Status-Live-brightgreen)
+
+**Live:** [https://siprios.my.id](https://siprios.my.id)
 
 ---
 
@@ -30,12 +33,18 @@ Sistem menggunakan algoritma penilaian berbasis data untuk menghasilkan **skor k
 ## Arsitektur
 
 ```
-┌─────────────────┐         ┌─────────────────┐           ┌─────────────────┐
-│   Frontend      │  fetch  │   Backend       │           │   Database      │
-│   HTML/CSS/JS   │ ------> │   FastAPI       │  ------>  │   SQLite (dev)  │  
-│   (Hostinger)   │         │   (Render)      |           │   PostgreSQL    │
-└─────────────────┘         └─────────────────┘           │   (production)  │
-                                                          └─────────────────┘
+User (Browser)
+      ↓
+https://siprios.my.id
+      ↓
+VPS Ubuntu 22.04 
+├── Nginx (port 80/443 + SSL Let's Encrypt)
+│   ├── /        → Frontend HTML/CSS/JS
+│   ├── /api     → FastAPI Backend
+│   └── /static  → File Upload (foto/surat)
+└── FastAPI (port 8000, systemd service)
+    ├── ML Model: Random Forest + XGBoost
+    └── CV Model: EfficientNet-B0 ONNX
 ```
 
 ---
@@ -210,6 +219,27 @@ Akun admin dibuat otomatis saat backend pertama kali dijalankan, sesuai konfigur
 
 - SQLite (development)
 - PostgreSQL (production)
+
+---
+
+## Model AI
+
+### Tabular Model — Skor Prioritas Warga
+- **Algoritma:** Random Forest + XGBoost ensemble
+  (weights: RF=0.8, XGB=0.2)
+- **Training data:** Costa Rica Household Poverty dataset
+- **Output:** skor 0–100 + kategori
+  (Membutuhkan / Rawan / Cukup / Mandiri)
+- **Notebook:** [tabular-bansos-model (Kaggle)](https://www.kaggle.com/code/raditya0/tabular-bansos-model)
+- **Fallback:** rule-based algorithm jika model tidak tersedia
+
+### CV Model — Kondisi Fisik Rumah
+- **Algoritma:** EfficientNet-B0 (format ONNX)
+- **Input:** foto kondisi rumah (JPG/PNG/WebP, maks 5MB)
+- **Output:** house_condition_score (0=bagus, 1=buruk)
+- **Notebook:** [house-image-classification (Kaggle)](https://www.kaggle.com/code/raditya0/house-image-classification)
+- **Penggunaan:** digunakan sebagai salah satu fitur
+  input ke tabular model
 
 ---
 
