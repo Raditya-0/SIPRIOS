@@ -7,7 +7,7 @@
   "use strict";
 
   /* Konfigurasi API */
-  var API_BASE = "http://202.10.37.172";
+  var API_BASE = "https://siprios.my.id";
 
   /* Kunci penyimpanan sesi */
   var TOKEN_KEY = "siprios_token";
