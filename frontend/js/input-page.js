@@ -1,20 +1,20 @@
-/* ============================================================
+/* 
    SIPRIOS — input-page.js
    Mendukung dua mode:
    - Mode Tambah (default): form kosong, POST /api/warga
    - Mode Edit (?mode=edit&id=X): pre-fill form, PUT /api/warga/:id
-   ============================================================ */
+*/
 (function () {
   "use strict";
   var S = window.SIPRIOS;
   if (!S.renderShell({ active: "/pages/input.html", requireRole: "kepala_desa" })) return;
 
-  /* ---------- Deteksi mode ---------- */
+  /* Deteksi mode */
   var params = new URLSearchParams(location.search);
   var isEdit = params.get("mode") === "edit";
   var editId = params.get("id") || sessionStorage.getItem("editTargetId") || null;
 
-  /* ---------- Set judul & label dinamis ---------- */
+  /* Set judul & label dinamis */
   if (isEdit) {
     document.title = "SIPRIOS \u2014 Edit Data Warga";
     var t = document.getElementById("pageTitle"); if (t) t.textContent = "Edit Data Warga";
@@ -33,7 +33,7 @@
     "jumlahLansia", "jumlahRuangan", "kamarTidur", "statusToilet", "statusRumah", "rataSekolah"];
   document.getElementById("progText").textContent = "0/" + REQUIRED.length;
 
-  /* ---------- Yes/No & radio pill ---------- */
+  /* Yes/No & radio pill */
   form.querySelectorAll("[data-pill]").forEach(function (row) {
     row.querySelectorAll(".pill").forEach(function (pill) {
       var input = pill.querySelector("input");
@@ -46,7 +46,7 @@
     });
   });
 
-  /* ---------- Stepper ---------- */
+  /* Stepper */
   form.querySelectorAll(".stepper").forEach(function (st) {
     var input = st.querySelector("input");
     st.querySelectorAll("button[data-step]").forEach(function (btn) {
@@ -63,14 +63,14 @@
     input.addEventListener("input", function () { clearError(input.name); refresh(); });
   });
 
-  /* ---------- Text/number inputs ---------- */
+  /* Text/number inputs */
   ["nomorKK", "nama", "sewaBulanan", "rataSekolah"].forEach(function (id) {
     var el = document.getElementById(id);
     el.addEventListener("input", function () { clearError(id); refresh(); });
     el.addEventListener("blur", function () { validateOne(id); });
   });
 
-  /* ---------- Foto upload ---------- */
+  /* Foto upload */
   var fotoInput = document.getElementById("foto");
   fotoInput.addEventListener("change", function () {
     var file = fotoInput.files[0];
@@ -98,7 +98,7 @@
     refresh();
   });
 
-  /* ---------- Helpers ---------- */
+  /* Helpers */
   function val(name) {
     var el = form.elements[name];
     if (!el) return "";
@@ -128,7 +128,7 @@
     setError(name); return false;
   }
 
-  /* ---------- Pre-fill form (mode edit) ---------- */
+  /* Pre-fill form (mode edit) */
   function setPill(name, value) {
     var row = form.querySelector('[data-pill="' + name + '"]');
     if (!row) return;
@@ -176,7 +176,7 @@
     refresh();
   }
 
-  /* ---------- Ringkasan & progress (realtime) ---------- */
+  /* Ringkasan & progress (realtime) */
   function refresh() {
     var nama = val("nama"), kk = val("nomorKK");
     document.getElementById("sumNama").textContent = nama || "\u2014";
@@ -200,7 +200,7 @@
     document.getElementById("progFill").style.width = Math.round((done / REQUIRED.length) * 100) + "%";
   }
 
-  /* ---------- Load data warga untuk mode edit ---------- */
+  /* Load data warga untuk mode edit */
   if (isEdit && editId) {
     S.overlay(true, "Memuat data...");
     S.getWarga(editId).then(function (wargaData) {
@@ -213,7 +213,7 @@
     });
   }
 
-  /* ---------- Submit ---------- */
+  /* Submit */
   form.addEventListener("submit", function (e) {
     e.preventDefault();
     var firstBad = null;

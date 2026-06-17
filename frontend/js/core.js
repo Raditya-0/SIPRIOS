@@ -1,20 +1,20 @@
-/* ============================================================
+/*
    SIPRIOS — core.js
    Shell (sidebar/topbar), klien API backend, toast,
    loading overlay, modal, autentikasi berbasis token.
-   ============================================================ */
+*/
 (function () {
   "use strict";
 
-  /* ---------- Konfigurasi API ---------- */
-  var API_BASE = "";
+  /* Konfigurasi API */
+  var API_BASE = "http://202.10.37.172";
 
-  /* ---------- Kunci penyimpanan sesi ---------- */
+  /* Kunci penyimpanan sesi */
   var TOKEN_KEY = "siprios_token";
   var CUR_KEY = "siprios_current";
   var SELECTED_KEY = "siprios_selected";
 
-  /* ---------- Helper fetch dengan guard 401/403 ---------- */
+  /* Helper fetch dengan guard 401/403 */
   function apiFetch(path, opts) {
     opts = opts || {};
     opts.headers = opts.headers || {};
@@ -37,7 +37,7 @@
     });
   }
 
-  /* ---------- Helper fetch + parse JSON, dengan pesan error manusiawi ---------- */
+  /* Helper fetch + parse JSON, dengan pesan error manusiawi */
   function apiJSON(path, opts) {
     return apiFetch(path, opts).then(function (res) {
       return res.json().catch(function () { return {}; }).then(function (data) {
@@ -50,7 +50,7 @@
     });
   }
 
-  /* ---------- API: Warga ---------- */
+  /* API: Warga */
   function listWarga(params) {
     var qs = "";
     if (params) {
@@ -70,14 +70,14 @@
   function putWarga(id, formData) { return apiJSON("/api/warga/" + encodeURIComponent(id), { method: "PUT", body: formData }); }
   function deleteWarga(id) { return apiJSON("/api/warga/" + encodeURIComponent(id), { method: "DELETE" }); }
 
-  /* ---------- Penanda data warga yang dipilih (untuk navigasi ke profil) ---------- */
+  /* Penanda data warga yang dipilih (untuk navigasi ke profil) */
   var Store = {
     select: function (id) { sessionStorage.setItem(SELECTED_KEY, id); },
     selectedId: function () { return sessionStorage.getItem(SELECTED_KEY); },
     clearSelected: function () { sessionStorage.removeItem(SELECTED_KEY); }
   };
 
-  /* ---------- Autentikasi & peran (berbasis token JWT) ----------
+  /* Autentikasi & peran (berbasis token JWT)
      Peran: 'kepala_desa' (input data), 'admin' (kelola prioritas),
      tanpa login = 'warga' (hanya lihat dashboard & prioritas). */
 
@@ -155,7 +155,7 @@
     roleLabel: roleLabel
   };
 
-  /* ---------- Format ---------- */
+  /* Format */
   function rupiah(n) {
     if (n === null || n === undefined || n === "" || isNaN(n)) return "Rp 0";
     return "Rp " + Number(n).toLocaleString("id-ID");
@@ -169,7 +169,7 @@
     return nama.trim().split(/\s+/).slice(0, 2).map(function (s) { return s[0]; }).join("").toUpperCase();
   }
 
-  /* ---------- Shell: sidebar + topbar ---------- */
+  /* Shell: sidebar + topbar */
   var NAV = [
     { href: "/index.html", icon: "fa-house", label: "Dashboard" },
     { href: "/pages/input.html", icon: "fa-pen-to-square", label: "Input Data Warga" },
@@ -265,7 +265,7 @@
     return true;
   }
 
-  /* ---------- Modal Masuk / Daftar Kepala Desa ---------- */
+  /* Modal Masuk / Daftar Kepala Desa */
   function openAuthModal(tab) {
     var root = openModal(
       '<button class="close" data-close><i class="fa-solid fa-xmark"></i></button>' +
@@ -358,13 +358,13 @@
     });
   }
 
-  /* ---------- Layar terkunci → redirect ke 403.html ---------- */
+  /* Layar terkunci → redirect ke 403.html */
   function lockScreen(title, msg, showLogin) {
     sessionStorage.setItem("lockReason", msg || title || "Halaman ini tidak dapat diakses dengan peran Anda saat ini.");
     window.location.href = "403.html";
   }
 
-  /* ---------- Toast ---------- */
+  /* Toast */
   function ensureToastStack() {
     var el = document.getElementById("toastStack");
     if (!el) { el = document.createElement("div"); el.id = "toastStack"; el.className = "toast-stack"; document.body.appendChild(el); }
@@ -381,7 +381,7 @@
     setTimeout(function () { t.style.transition = "opacity .24s, transform .24s"; t.style.opacity = "0"; t.style.transform = "translateX(120%)"; setTimeout(function () { t.remove(); }, 240); }, 4000);
   }
 
-  /* ---------- Loading overlay ---------- */
+  /* Loading overlay */
   function overlay(on, text) {
     var el = document.getElementById("sipriosOverlay");
     if (!el) {
@@ -394,7 +394,7 @@
     el.classList.toggle("is-on", !!on);
   }
 
-  /* ---------- Modal generik ---------- */
+  /* Modal generik */
   function openModal(html, noDismiss) {
     var bd = document.getElementById("sipriosModal");
     if (!bd) {
@@ -444,7 +444,7 @@
     });
   }
 
-  /* ---------- Ekspor global ---------- */
+  /* Ekspor global */
   window.SIPRIOS = {
     API_BASE: API_BASE,
     Store: Store,

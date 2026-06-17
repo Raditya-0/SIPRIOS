@@ -1,8 +1,8 @@
-/* ============================================================
+/* 
    SIPRIOS — Sistem Prioritas Sosial
    Tema visual: Adobe Spectrum (merah #FA0F00, ink, putih/abu)
    Layout: navigasi atas horizontal (top navbar)
-   ============================================================ */
+*/
 @import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,600;0,700;0,900&display=swap');
 
 :root {
@@ -68,9 +68,7 @@ a { color: inherit; text-decoration: none; }
   * { transition: none !important; animation: none !important; }
 }
 
-/* ============================================================
-   TOP NAVIGATION BAR
-   ============================================================ */
+/* TOP NAVIGATION BAR */
 .app { min-height: 100vh; }
 
 .topnav {
