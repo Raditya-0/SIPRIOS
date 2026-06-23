@@ -133,9 +133,17 @@ async def create_warga(
     payload: dict = Depends(require_kepala_desa),
     db: Session = Depends(get_db),
 ):
-    # validasi panjang nomor KK
-    if len(nomorKK) != 16 or not nomorKK.isdigit():
+    # validasi nomor KK hanya angka
+    if not nomorKK.isdigit():
+        raise HTTPException(status_code=422, detail="Nomor KK hanya boleh mengandung angka.")
+
+    # validasi nomor KK tepat 16 digit
+    if len(nomorKK) != 16:
         raise HTTPException(status_code=422, detail="Nomor KK harus tepat 16 digit angka.")
+
+    # validasi nama minimal 3 karakter
+    if len(nama.strip()) < 3:
+        raise HTTPException(status_code=422, detail="Nama minimal 3 karakter.")
 
     # cek duplikat
     existing = db.query(Warga).filter(Warga.nomor_kk == nomorKK).first()
@@ -352,6 +360,10 @@ async def update_warga(
     # cek kepemilikan — hanya bisa edit data sendiri
     if warga.input_oleh != payload["sub"]:
         raise HTTPException(status_code=403, detail="Anda tidak berhak mengubah data ini.")
+
+    # validasi nama minimal 3 karakter
+    if len(nama.strip()) < 3:
+        raise HTTPException(status_code=422, detail="Nama minimal 3 karakter.")
 
     # upload foto baru jika ada + hitung kondisi rumah dari CV model
     house_score = 0.5

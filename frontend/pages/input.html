@@ -26,7 +26,7 @@
         <form id="wargaForm" novalidate>
         <div class="input-layout">
 
-          <!-- KIRI: FORM -->
+          <!-- Form -->
           <div class="card card--pad-lg">
             <div class="form-grid">
 
@@ -35,7 +35,7 @@
               <div class="field" data-field="nomorKK">
                 <label for="nomorKK">Nomor KK <span class="req">*</span></label>
                 <input type="text" id="nomorKK" name="nomorKK" inputmode="numeric" maxlength="16" placeholder="35XXXXXXXXXXXXXX">
-                <span class="err-msg">Nomor KK harus tepat 16 digit angka</span>
+                <span class="err-msg" id="nomorKKErrMsg">Nomor KK harus tepat 16 digit angka</span>
               </div>
 
               <div class="field" data-field="nama">
@@ -199,7 +199,7 @@
             </div>
           </div>
 
-          <!-- KANAN: RINGKASAN STICKY -->
+          <!-- Ringkasan -->
           <div class="summary-panel">
             <div class="card">
               <div class="section-head"><span class="eyebrow"><span class="diamond">&#9670;</span> Ringkasan Data</span></div>

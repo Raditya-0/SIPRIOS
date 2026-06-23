@@ -110,8 +110,20 @@
   }
   function num(name) { var v = val(name); return v === "" ? null : Number(v); }
   function fieldEl(name) { return form.querySelector('[data-field="' + name + '"]'); }
-  function setError(name) { var f = fieldEl(name); if (f) f.classList.add("is-error"); }
+  /* Set error, opsional ganti teks pesan */
+  function setError(name, msg) {
+    var f = fieldEl(name);
+    if (!f) return;
+    f.classList.add("is-error");
+    if (msg) {
+      var em = f.querySelector(".err-msg");
+      if (em) em.textContent = msg;
+    }
+  }
   function clearError(name) { var f = fieldEl(name); if (f) f.classList.remove("is-error"); }
+
+  var NOMOR_KK_MSG_LEN = "Nomor KK harus tepat 16 digit angka";
+  var NOMOR_KK_MSG_DIGIT = "Nomor KK hanya boleh mengandung angka.";
 
   function isFilled(name) {
     var v = val(name);
@@ -122,8 +134,18 @@
     return v !== "";
   }
 
+  /* Validasi nomor KK dengan pesan beda per kasus */
+  function validateNomorKK() {
+    var v = val("nomorKK");
+    if (v === "") { setError("nomorKK", NOMOR_KK_MSG_LEN); return false; }
+    if (!/^\d+$/.test(v)) { setError("nomorKK", NOMOR_KK_MSG_DIGIT); return false; }
+    if (v.length !== 16) { setError("nomorKK", NOMOR_KK_MSG_LEN); return false; }
+    clearError("nomorKK"); return true;
+  }
+
   function validateOne(name) {
     if (REQUIRED.indexOf(name) === -1) return true;
+    if (name === "nomorKK") return validateNomorKK();
     if (isFilled(name)) { clearError(name); return true; }
     setError(name); return false;
   }
