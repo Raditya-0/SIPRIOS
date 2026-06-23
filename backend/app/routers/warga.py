@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.models.database import get_db, User, Warga
 from app.core.security import (
-    get_current_user, require_auth, require_kepala_desa, require_admin
+    get_current_user, require_auth, require_kepala_desa, require_admin, require_admin_or_kd
 )
 from app.core.config import settings
 from app.services.scoring import WargaData, proses_warga, yn, predict_house_condition
@@ -202,7 +202,7 @@ async def export_pdf_route(
     q: Optional[str] = Query(None),
     level: Optional[int] = Query(None),
     db: Session = Depends(get_db),
-    payload: dict = Depends(require_admin),
+    payload: dict = Depends(require_admin_or_kd),
 ):
     rows = db.query(Warga, User.username).join(User, Warga.input_oleh == User.id)
     if q:
@@ -231,7 +231,7 @@ async def export_excel_route(
     q: Optional[str] = Query(None),
     level: Optional[int] = Query(None),
     db: Session = Depends(get_db),
-    payload: dict = Depends(require_admin),
+    payload: dict = Depends(require_admin_or_kd),
 ):
     rows = db.query(Warga, User.username).join(User, Warga.input_oleh == User.id)
     if q:

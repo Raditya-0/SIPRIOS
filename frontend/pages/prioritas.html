@@ -61,6 +61,7 @@
   if (!S.renderShell({ active: "/pages/prioritas.html", title: "Daftar Prioritas" })) return;
 
   var isAdmin = S.Auth.isAdmin();
+  var canExport = isAdmin || S.Auth.isKepalaDesa();
   var filter = "all";
   var query = "";
   var allData = [];
@@ -69,7 +70,7 @@
   (function () {
     var banner = document.getElementById("roleBanner");
     if (banner) banner.style.display = "none"; // banner dihapus per masukan Radit
-    if (isAdmin) {
+    if (canExport) {
       document.getElementById("adminTools").style.display = "inline-flex";
     }
   })();
@@ -226,8 +227,24 @@
     render();
   });
   document.getElementById("reloadBtn").addEventListener("click", function () { load().then(function () { S.toast("Data dimuat ulang.", "info"); }); });
-  document.getElementById("pdfBtn").addEventListener("click", function () { S.toast("Menyiapkan dokumen PDF untuk diunduh...", "info"); });
-  document.getElementById("excelBtn").addEventListener("click", function () { S.toast("Menyiapkan berkas Excel untuk diunduh...", "info"); });
+  // Susun query export sesuai filter & pencarian aktif
+  function exportQuery() {
+    var parts = [];
+    if (query) parts.push("q=" + encodeURIComponent(query));
+    if (filter !== "all") parts.push("level=" + encodeURIComponent(filter));
+    return parts.length ? "?" + parts.join("&") : "";
+  }
+
+  document.getElementById("pdfBtn").addEventListener("click", function () {
+    S.toast("Menyiapkan dokumen PDF untuk diunduh...", "info");
+    S.downloadFile("/api/warga/export/pdf" + exportQuery())
+      .catch(function (err) { S.toast(err.message || "Gagal mengunduh PDF.", "error"); });
+  });
+  document.getElementById("excelBtn").addEventListener("click", function () {
+    S.toast("Menyiapkan berkas Excel untuk diunduh...", "info");
+    S.downloadFile("/api/warga/export/excel" + exportQuery())
+      .catch(function (err) { S.toast(err.message || "Gagal mengunduh Excel.", "error"); });
+  });
 
   load();
 })();

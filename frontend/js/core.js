@@ -70,6 +70,26 @@
   function putWarga(id, formData) { return apiJSON("/api/warga/" + encodeURIComponent(id), { method: "PUT", body: formData }); }
   function deleteWarga(id) { return apiJSON("/api/warga/" + encodeURIComponent(id), { method: "DELETE" }); }
 
+  /* Unduh berkas export sebagai blob lalu trigger save */
+  function downloadFile(path) {
+    return apiFetch(path).then(function (res) {
+      if (!res.ok) throw new Error("Gagal membuat berkas unduhan.");
+      var cd = res.headers.get("Content-Disposition") || "";
+      var m = cd.match(/filename="?([^"]+)"?/);
+      var filename = m ? m[1] : "unduhan";
+      return res.blob().then(function (blob) {
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      });
+    });
+  }
+
   /* Penanda data warga yang dipilih (untuk navigasi ke profil) */
   var Store = {
     select: function (id) { sessionStorage.setItem(SELECTED_KEY, id); },
@@ -457,6 +477,7 @@
     postWarga: postWarga,
     putWarga: putWarga,
     deleteWarga: deleteWarga,
+    downloadFile: downloadFile,
     rupiah: rupiah,
     tanggalID: tanggalID,
     initials: initials,
