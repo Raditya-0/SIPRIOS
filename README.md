@@ -10,7 +10,7 @@
 
 **Live:** [https://siprios.my.id](https://siprios.my.id)
 
----
+![Dashboard](image/Dashboard.png)
 
 ## Tentang Proyek
 
@@ -27,6 +27,13 @@ Sistem menggunakan algoritma penilaian berbasis data untuk menghasilkan **skor k
 - **Manajemen Akun** —> Admin approve/tolak pendaftaran Kepala Desa
 - **Export Laporan** —> PDF dan Excel
 - **Keamanan** —> JWT Authentication, bcrypt password hashing
+
+---
+
+## Galeri 
+![DaftarPrioritas](image/DaftarPrioritas.png)
+![InputData](image/InputData.png)
+![KeputusanAI](image/KeputusanAI.png)
 
 ---
 
@@ -225,6 +232,7 @@ Akun admin dibuat otomatis saat backend pertama kali dijalankan, sesuai konfigur
 ## Model AI
 
 ### Tabular Model — Skor Prioritas Warga
+
 - **Algoritma:** Random Forest + XGBoost ensemble
   (weights: RF=0.8, XGB=0.2)
 - **Training data:** Costa Rica Household Poverty dataset
@@ -234,6 +242,7 @@ Akun admin dibuat otomatis saat backend pertama kali dijalankan, sesuai konfigur
 - **Fallback:** rule-based algorithm jika model tidak tersedia
 
 ### CV Model — Kondisi Fisik Rumah
+
 - **Algoritma:** EfficientNet-B0 (format ONNX)
 - **Input:** foto kondisi rumah (JPG/PNG/WebP, maks 5MB)
 - **Output:** house_condition_score (0=bagus, 1=buruk)
